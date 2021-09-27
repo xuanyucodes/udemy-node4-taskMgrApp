@@ -2,6 +2,7 @@ const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const Task = require('./task')
 
 const userSchema = new mongoose.Schema({ // first arg = str name of model, second arg = fields you want and their customisation
     name: { // also supports booleans, dates, arrays, binary, ObjectId etc.
@@ -37,6 +38,21 @@ const userSchema = new mongoose.Schema({ // first arg = str name of model, secon
     }]
 })
 
+// first arg = name of virtual field, second arg = configure the field
+userSchema.virtual('tasks', {
+    ref: 'Task',
+    localField: '_id', // field of User that matches foreignField
+    foreignField: 'owner' // field name on the other entity
+})  
+
+userSchema.methods.toJSON = function () { // standard fn cos we need "this"
+    const user = this
+    const userObject = user.toObject() // returns an obj with all the metadata and methods removed like .save() or .toObject() etc.
+    delete userObject.password
+    delete userObject.tokens
+    return userObject
+}
+
 userSchema.methods.generateAuthToken = async function () {
     const user = this
     const token = jwt.sign({_id: user._id.toString()}, 'mysecretsignature')
@@ -45,7 +61,7 @@ userSchema.methods.generateAuthToken = async function () {
     return token
 }
 
-// statics are for the Model (class), while methods are for the instances
+// statics are for the Model uppercase User (class), while methods are for the instances lowercase user
 userSchema.statics.findByCredentials = async (email, password) => { // set up a new value on userSchema.statics, so we can have access to it later
     const user = await User.findOne({email})
     if (!user) { throw new Error('Unable to login.')} // throw an error to catch()
@@ -62,6 +78,13 @@ userSchema.pre('save', async function(next) {
     if (user.isModified('password')) { // isModified() checks if a field was changed; even if change to same value it is counted as changed
         user.password = await bcrypt.hash(user.password, 8)
     }
+    next()
+})
+
+// deletes a User's tasks if user is deleted
+userSchema.pre('remove', async function (next) {
+    const user = this
+    await Task.deleteMany({owner: user._id})
     next()
 })
 

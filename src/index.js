@@ -7,6 +7,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 // middleware - authentication. need to include BEFORE the app.use() portions
+// commented out cos moved the middleware into the routers themselves but still follow the path of path -> middleware -> fn  
 // app.use((req, res, next) => {
 //     if (req.method === 'GET') {
 //         res.send('GET requests are disabled')
@@ -25,15 +26,3 @@ app.use(userRouter) // register the User router
 app.use(taskRouter)
 
 app.listen(port, () => console.log(`Server is up on port ${port}.`))
-
-const jwt = require('jsonwebtoken')
-const myFn = async () =>  {
-    // first arg = data embedded in token such as userid, second arg = a secret (eg random series of chars) to indicate token not been altered or tampered with, third arg = options; returns token
-    // const token = jwt.sign({_id: 'abc123', }, 'thisismynewcourse', {expiresIn: '10 second'}) 
-    // console.log(token)
-
-    // const data = jwt.verify(token, 'thisismynewcourse')
-    // console.log(data)
-}
-
-myFn()

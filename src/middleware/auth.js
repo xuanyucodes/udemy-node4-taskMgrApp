@@ -1,11 +1,11 @@
 const jwt = require('jsonwebtoken') // to validate token
 const User = require('../models/user') // then find that user
 
-// check if have authentication token, and return the user
+// check if have authentication token, return the user, and allow the next step
 const auth = async (req, res, next) => {
     try {
         const token = req.header('Authorization').replace('Bearer ', '') // access request's header with a key called 'Authorization'
-        const decoded = jwt.verify(token, 'mysecretsignature')
+        const decoded = jwt.verify(token, 'mysecretsignature') // returns token that contains both user's _id and secret signature
         const user = await User.findOne({_id: decoded._id, 'tokens.token': token}) // find user by id, and ensure that he still has an active token
         
         if(!user) {throw new Error()} // to trigger .catch()
