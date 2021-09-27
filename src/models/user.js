@@ -36,6 +36,8 @@ const userSchema = new mongoose.Schema({ // first arg = str name of model, secon
             required: true 
         }
     }]
+}, {
+    timestamps: true,
 })
 
 // first arg = name of virtual field, second arg = configure the field

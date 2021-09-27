@@ -14,10 +14,28 @@ router.post('/tasks', auth, async (req, res) => {
 })
 
 // read all tasks owned by user
+// GET /tasks?completed=true||false
 router.get('/tasks', auth, async (req, res) => {
+    const match = {}
+    if (req.query.completed) { match.completed = req.query.completed === 'true' }
+    const sort = {}
+    if (req.query.sortBy) {
+        const parts = req.query.sortBy.split(':')
+        sort[parts[0]] = parts[1] === 'desc'? -1: 1
+    }
     try {
         // correct code-> const tasks = await Task.find({owner: req.user._id}) // correct code, but lets use alternative
-        await req.user.populate('tasks') // alternative approach
+        // await req.user.populate('tasks') // alternative approach; commented out to use one w more features
+        await req.user.populate({
+            path: 'tasks',
+            match: match,
+            options: {
+                limit: parseInt(req.query.limit),
+                skip: parseInt(req.query.skip),
+                sort: sort
+            }
+        })
+
         res.send(req.user.tasks)
     } catch (e) { res.status(500).send(e) }
 })
