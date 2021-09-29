@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Task = require('./task')
 
-const userSchema = new mongoose.Schema({ // first arg = str name of model, second arg = fields you want and their customisation
+const userSchema = new mongoose.Schema({ 
     name: { // also supports booleans, dates, arrays, binary, ObjectId etc.
         type: String,
         required: true, // field is compulsory
@@ -90,6 +90,6 @@ userSchema.pre('remove', async function (next) {
     next()
 })
 
-const User = mongoose.model('User', userSchema)
+const User = mongoose.model('User', userSchema) // first arg = str name of model, second arg = fields you want and their customisation
 
 module.exports = User
